@@ -5,6 +5,7 @@ import json
 import random
 # import pickle
 import pandas
+import string
 
 random.seed(1234)
 
@@ -101,4 +102,88 @@ class ECQA:
 
     def get_test_samples(self):
         return self.get_samples(self.test_path)
-    
+
+class ANLI:
+    def __init__(self, data_dir):
+        # Concatenated test.jsonl files from R1, R2, and R3 (all rounds).
+        self.test_path = os.path.join(data_dir, "test.jsonl")
+
+    def get_samples(self, file_path):
+        samples = []
+
+        with open(file_path, "r") as f:
+            jsonlines = f.read().splitlines()
+            for i, jsonline in enumerate(jsonlines):
+                sample = json.loads(jsonline)
+
+                sample_json = {
+                    "index": i,
+                    "uid": sample["uid"],
+                    "question": f'Premise: {sample["context"]}\nHypothesis: {sample["hypothesis"]}'
+                    + " Choose from e (entailment), c (contradiction), n (neutral).",
+                    "answer": sample[
+                        "label"
+                    ],  # e - entailment, c - contradiction, n - neutral
+                }
+                samples.append(sample_json)
+
+        return samples
+
+    def get_test_samples(self):
+        # return self.get_samples(self.test_path)
+        samples = self.get_samples(self.test_path)
+        random.shuffle(samples)
+        return samples
+
+
+class DateUnderstanding:
+    def __init__(self, data_dir):
+        # Concatenated test.jsonl files from R1, R2, and R3 (all rounds).
+        self.test_path = os.path.join(data_dir, "task.json")
+
+    def get_samples(self, file_path):
+        samples = []
+        with open(file_path, "r", encoding="utf-8-sig") as f:
+            data = json.load(f)
+            json_inputs = data["examples"]
+
+            for i, json_input in enumerate(json_inputs):
+                # Create a list of possible options in the format ["A)05/01/2021", "B)02/23/2021", ...]
+                options = [
+                    f"{letter}){date}"
+                    for letter, date in zip(
+                        string.ascii_uppercase, json_input["target_scores"].keys()
+                    )
+                ]
+
+                # Find the correct answer
+                correct_date = next(
+                    date  # Take only "A" from "A)05/01/2021"
+                    for date, score in json_input["target_scores"].items()
+                    if score == 1
+                )
+                correct_letter = string.ascii_uppercase[
+                    list(json_input["target_scores"].keys()).index(correct_date)
+                ]
+
+                # print("Options:", options)
+                # print("Correct Answer:", correct_answer)
+
+                samples.append(
+                    {
+                        "index": i,
+                        "question": json_input["input"]
+                        + " Choose one of the following options: "
+                        + str(options) + ". Answer only a single uppercase letter.",
+                        "options": options,
+                        "answer": correct_letter,
+                    }
+                )
+
+        return samples
+
+    def get_test_samples(self):
+        # return self.get_samples(self.test_path)
+        samples = self.get_samples(self.test_path)
+        random.shuffle(samples)
+        return samples

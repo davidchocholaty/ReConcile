@@ -8,9 +8,10 @@ import argparse
 from utils import *
 from generation import *
 from tqdm import tqdm
-from data_utils import StrategyQA, GSM8k, Aqua, ECQA
+from data_utils import StrategyQA, GSM8k, Aqua, ECQA, ANLI, DateUnderstanding
 
 from openai.error import InvalidRequestError
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -28,16 +29,25 @@ if __name__ == '__main__':
         data = GSM8k(data_dir=f'./dataset/{args.dataset}')
     elif args.dataset == "Aqua":
         data = Aqua(data_dir=f'./dataset/{args.dataset}')
+    elif args.dataset == "ANLI":
+        data = ANLI(data_dir=f'./dataset/{args.dataset}')
+    elif args.dataset == "DateUnderstanding":
+        data = DateUnderstanding(data_dir=f'./dataset/{args.dataset}')
 
     test_samples = data.get_test_samples()[:args.num_samples]
     print(f"Number of test samples={len(test_samples)}")
 
-    with open(f'convincing/{args.dataset}/chatgpt.json', 'r') as f:
-        convincing_gpt = json.load(f)
-    with open(f'convincing/{args.dataset}/claude.json', 'r') as f:
-        convincing_claude = json.load(f)
-    with open(f'convincing/{args.dataset}/bard.json', 'r') as f:
-        convincing_bard = json.load(f)
+    if args.dataset in ["SQA", "ECQA", "Aqua", "GSM8k"]:
+        with open(f'convincing/{args.dataset}/chatgpt.json', 'r') as f:
+            convincing_gpt = json.load(f)
+        with open(f'convincing/{args.dataset}/claude.json', 'r') as f:
+            convincing_claude = json.load(f)
+        with open(f'convincing/{args.dataset}/bard.json', 'r') as f:
+            convincing_bard = json.load(f)
+    else:
+        convincing_bard = []
+        convincing_claude = []
+        convincing_gpt = []
 
     # claude = ClaudeModel()
 
@@ -133,6 +143,7 @@ if __name__ == '__main__':
 
         all_results = clean_output(all_results, r, dataset=args.dataset)
         all_results = parse_output(all_results, r)
+
         print(f"Round {r} Performance: {evaluate_all(all_results, r)}")
 
     with open(f'{args.dataset}_round_{args.round}.pkl', 'wb') as f:

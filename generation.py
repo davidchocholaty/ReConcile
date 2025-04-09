@@ -134,10 +134,10 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
             
     if not result:
         result = invalid_result(dataset)
-        
-    if dataset == "SQA":
+
+    if dataset in ["SQA", "ANLI"]:
         result['answer'] = result['answer'].lower()
-    elif dataset == "Aqua":
+    elif dataset in ["Aqua", "DateUnderstanding"]:
         result['answer'] = result['answer'].upper()
     elif dataset in ["GSM8k", "ECQA"]:
         result['answer'] = str(result['answer'])

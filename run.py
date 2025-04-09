@@ -1,14 +1,16 @@
-import re
+# import re
 import time
 import json
 import pickle
-import random
+# import random
 import argparse
-import numpy as np
+# import numpy as np
 from utils import *
 from generation import *
 from tqdm import tqdm
 from data_utils import StrategyQA, GSM8k, Aqua, ECQA
+
+from openai.error import InvalidRequestError
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -37,35 +39,12 @@ if __name__ == '__main__':
     with open(f'convincing/{args.dataset}/bard.json', 'r') as f:
         convincing_bard = json.load(f)
 
-    claude = ClaudeModel()
+    # claude = ClaudeModel()
 
     # Phase1: Initial Response Generation
 
-    claude_result = []
-    while True:
-        for test_sample in tqdm(test_samples[len(claude_result):]):
-            tmp = {}
-            tmp['gold_answer'] = test_sample['answer']
-            try:
-                result = claude.claude_gen_ans(test_sample,
-                                            convincing_samples=convincing_gpt+convincing_bard,
-                                            additional_instruc=None,
-                                            intervene=False,
-                                            dataset=args.dataset)
-            except ValueError:
-                print("cannot generate valid response for this sample.")
-                result = invalid_result(args.dataset)
-            if result == 403:
-                pause = input("rate limit: let's take a break. enter anything to resume: ")
-                if pause: break
-
-            tmp['prediction'] = result
-            claude_result.append(tmp)
-            time.sleep(1)
-        break
-
-    gpt_result = []
-    for test_sample in tqdm(test_samples[len(gpt_result):]):
+    gpt1_result = []
+    for test_sample in tqdm(test_samples[len(gpt1_result):]):
         tmp = {}
         tmp['gold_answer'] = test_sample['answer']
         try:
@@ -78,30 +57,47 @@ if __name__ == '__main__':
             print("blocked by Azure OpenAI’s content management policy.")
             result = invalid_result(args.dataset)
         tmp['prediction'] = result
-        gpt_result.append(tmp)
+        gpt1_result.append(tmp)
         time.sleep(1)
-   
-    bard_result = []
-    for test_sample in tqdm(test_samples[len(bard_result):]):
+
+    gpt2_result = []
+    for test_sample in tqdm(test_samples[len(gpt2_result):]):
         tmp = {}
         tmp['gold_answer'] = test_sample['answer']
         try:
-            result = bard_gen_ans(test_sample,
-                                convincing_samples=convincing_claude+convincing_gpt,
+            result = gpt_gen_ans(test_sample,
+                                convincing_samples=convincing_claude+convincing_bard,
                                 additional_instruc=None,
                                 intervene=False,
-                                dataset=args.dataset)   
-            tmp['prediction'] = result
-        except ValueError:
-            tmp['prediction'] = invalid_result(args.dataset)
-        
-        bard_result.append(tmp)
+                                dataset=args.dataset)
+        except InvalidRequestError:
+            print("blocked by Azure OpenAI’s content management policy.")
+            result = invalid_result(args.dataset)
+        tmp['prediction'] = result
+        gpt2_result.append(tmp)
+        time.sleep(1)
+   
+    gpt3_result = []
+    for test_sample in tqdm(test_samples[len(gpt3_result):]):
+        tmp = {}
+        tmp['gold_answer'] = test_sample['answer']
+        try:
+            result = gpt_gen_ans(test_sample,
+                                convincing_samples=convincing_claude+convincing_bard,
+                                additional_instruc=None,
+                                intervene=False,
+                                dataset=args.dataset)
+        except InvalidRequestError:
+            print("blocked by Azure OpenAI’s content management policy.")
+            result = invalid_result(args.dataset)
+        tmp['prediction'] = result
+        gpt3_result.append(tmp)
         time.sleep(1)
 
     # Evaluation for the initial round
 
     all_results = []
-    for c, g, b in zip(claude_result, gpt_result, bard_result):
+    for c, g, b in zip(gpt1_result, gpt2_result, gpt3_result):
         tmp = {}
         tmp['gold_answer'] = c['gold_answer']
         tmp['claude_output_0'] = c['prediction']
@@ -117,11 +113,11 @@ if __name__ == '__main__':
 
     for r in range(1, args.round+1):
         print(f"----- Round {r} Discussion -----")
-        all_results = claude.claude_debate(test_samples,
-                                        all_results,
-                                        rounds=r,
-                                        convincing_samples=convincing_gpt+convincing_bard,
-                                        dataset=args.dataset)
+        all_results = gpt_debate(test_samples,
+                            all_results,
+                            rounds=r,
+                            convincing_samples=convincing_claude+convincing_bard,
+                            dataset=args.dataset)
 
         all_results = gpt_debate(test_samples,
                             all_results,
@@ -129,10 +125,10 @@ if __name__ == '__main__':
                             convincing_samples=convincing_claude+convincing_bard,
                             dataset=args.dataset)
 
-        all_results = bard_debate(test_samples,
+        all_results = gpt_debate(test_samples,
                             all_results,
                             rounds=r,
-                            convincing_samples=convincing_claude+convincing_gpt,
+                            convincing_samples=convincing_claude+convincing_bard,
                             dataset=args.dataset)
 
         all_results = clean_output(all_results, r, dataset=args.dataset)

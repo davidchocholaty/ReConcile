@@ -1,19 +1,19 @@
 import os
-import time
+# import time
 import backoff
 from tqdm import tqdm
 from dotenv import load_dotenv
-from utils import prepare_context, prepare_context_for_chat_assistant, prepare_context_for_bard, parse_json, invalid_result
+from utils import prepare_context_for_chat_assistant, parse_json, invalid_result
 
 import openai
-from claude import Client
-import google.generativeai as palm
+# from claude import Client
+# import google.generativeai as palm
 
-from curl_cffi import CurlError
-from json import JSONDecodeError
-from requests.exceptions import RequestException
-from google.api_core.exceptions import ServiceUnavailable
-from openai.error import RateLimitError, APIError, ServiceUnavailableError, APIConnectionError, InvalidRequestError
+# from curl_cffi import CurlError
+# from json import JSONDecodeError
+# from requests.exceptions import RequestException
+# from google.api_core.exceptions import ServiceUnavailable
+from openai.error import RateLimitError, APIError, ServiceUnavailableError, APIConnectionError #, InvalidRequestError
 
 load_dotenv()
 
@@ -21,10 +21,11 @@ openai.api_type = "azure"
 openai.api_base = os.environ['OPEN_AI_API_BASE']
 openai.api_version = os.environ['OPEN_AI_API_VERSION']
 openai.api_key = os.environ['OPEN_AI_API_KEY']
-palm.configure(api_key=os.environ['PALM_API_KEY'])
+# palm.configure(api_key=os.environ['PALM_API_KEY'])
 # Note: you can add more account in .env and here
-claude_coockies = [c for c in [os.environ['CLAUDE_COOCKIE1'], os.environ['CLAUDE_COOCKIE2'], os.environ['CLAUDE_COOCKIE3'], os.environ['CLAUDE_COOCKIE4'], os.environ['CLAUDE_COOCKIE5']] if c]
+# claude_coockies = [c for c in [os.environ['CLAUDE_COOCKIE1'], os.environ['CLAUDE_COOCKIE2'], os.environ['CLAUDE_COOCKIE3'], os.environ['CLAUDE_COOCKIE4'], os.environ['CLAUDE_COOCKIE5']] if c]
 
+'''
 class ClaudeModel:
     def __init__(self):
         self.coockies = claude_coockies
@@ -111,7 +112,7 @@ class ClaudeModel:
                     print("taking a rest for the count down...")
                     break
         return all_results
-
+'''
 @backoff.on_exception(backoff.expo, (RateLimitError, APIError, ServiceUnavailableError, APIConnectionError, ValueError), max_tries=5)
 def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, intervene=False, dataset="SQA"):
     contexts = prepare_context_for_chat_assistant(sample, convincing_samples, intervene, dataset)
@@ -120,6 +121,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     # print(contexts)
     completion = openai.ChatCompletion.create(
               engine="gpt-35-turbo",
+              # engine="gpt-4",
               messages=contexts)
     
     output = completion['choices'][0]['message']['content']
@@ -141,7 +143,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
         result['answer'] = str(result['answer'])
 
     return result
-
+'''
 @backoff.on_exception(backoff.expo, (ServiceUnavailable, ValueError, TypeError), max_tries=5)
 def bard_gen_ans(sample, convincing_samples=None, additional_instruc=None, intervene=False, dataset="SQA"):
     msg, cs, us = prepare_context_for_bard(sample, convincing_samples, intervene, dataset)
@@ -173,7 +175,7 @@ def bard_gen_ans(sample, convincing_samples=None, additional_instruc=None, inter
     elif dataset in ["GSM8k", "ECQA"]:
         result['answer'] = str(result['answer'])
     return result
-
+'''
 def gpt_debate(test_samples, all_results, rounds, convincing_samples, dataset):
     r = '_' + str(rounds-1)
     for i, s in tqdm(enumerate(all_results)):
@@ -189,7 +191,7 @@ def gpt_debate(test_samples, all_results, rounds, convincing_samples, dataset):
                                  dataset=dataset)            
             s['gpt3_output_'+str(rounds)] = result
     return all_results
-
+'''
 def bard_debate(test_samples, all_results, rounds, convincing_samples, dataset):
     r = '_' + str(rounds-1)
     for i, s in tqdm(enumerate(all_results)):
@@ -229,3 +231,4 @@ def bard_transform_json(model_output, dataset):
     response = palm.chat(messages=prompt)
     return response.last
 
+'''

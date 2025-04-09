@@ -37,17 +37,21 @@ if __name__ == '__main__':
     test_samples = data.get_test_samples()[:args.num_samples]
     print(f"Number of test samples={len(test_samples)}")
 
-    if args.dataset in ["SQA", "ECQA", "Aqua", "GSM8k"]:
-        with open(f'convincing/{args.dataset}/chatgpt.json', 'r') as f:
-            convincing_gpt = json.load(f)
-        with open(f'convincing/{args.dataset}/claude.json', 'r') as f:
-            convincing_claude = json.load(f)
-        with open(f'convincing/{args.dataset}/bard.json', 'r') as f:
-            convincing_bard = json.load(f)
-    else:
-        convincing_bard = []
-        convincing_claude = []
-        convincing_gpt = []
+    # if args.dataset in ["SQA", "ECQA", "Aqua", "GSM8k"]:
+    #     with open(f'convincing/{args.dataset}/chatgpt.json', 'r') as f:
+    #         convincing_gpt = json.load(f)
+    #     with open(f'convincing/{args.dataset}/claude.json', 'r') as f:
+    #         convincing_claude = json.load(f)
+    #     with open(f'convincing/{args.dataset}/bard.json', 'r') as f:
+    #         convincing_bard = json.load(f)
+    # else:
+    #     convincing_bard = []
+    #     convincing_claude = []
+    #     convincing_gpt = []
+
+    convincing_bard = []
+    convincing_claude = []
+    convincing_gpt = []
 
     # claude = ClaudeModel()
 

@@ -7,7 +7,7 @@ import random
 import pandas
 import string
 
-random.seed(1234)
+# random.seed(1234)
 
 class StrategyQA:
     def __init__(self, data_dir):
@@ -29,7 +29,9 @@ class StrategyQA:
         return samples
 
     def get_test_samples(self):
-        return self.get_samples(self.dev_path)
+        samples = self.get_samples(self.dev_path)
+        random.shuffle(samples)
+        return samples
 
 class GSM8k:
     def __init__(self, data_dir):
@@ -58,7 +60,9 @@ class GSM8k:
         return samples
 
     def get_test_samples(self):
-        return self.get_samples(self.test_path)
+        samples = self.get_samples(self.test_path)
+        random.shuffle(samples)
+        return samples
     
 class Aqua:
     def __init__(self, data_dir):
@@ -79,7 +83,9 @@ class Aqua:
         return samples
 
     def get_test_samples(self):
-        return self.get_samples(self.test_path)
+        samples = self.get_samples(self.test_path)
+        random.shuffle(samples)
+        return samples
         
 class ECQA:
     def __init__(self, data_dir):
@@ -101,7 +107,9 @@ class ECQA:
         return samples
 
     def get_test_samples(self):
-        return self.get_samples(self.test_path)
+        samples = self.get_samples(self.test_path)
+        random.shuffle(samples)
+        return samples
 
 class ANLI:
     def __init__(self, data_dir):

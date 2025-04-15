@@ -1,4 +1,5 @@
 import os
+import re
 # import time
 import backoff
 from tqdm import tqdm
@@ -135,12 +136,48 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     if not result:
         result = invalid_result(dataset)
 
-    if dataset in ["SQA", "ANLI"]:
+    if dataset =="SQA":
         result['answer'] = result['answer'].lower()
-    elif dataset in ["Aqua", "DateUnderstanding"]:
+
+        if re.search(r'\b(no|No|NO)\.?\b', result['answer']):
+            result['answer'] = "no"
+        elif re.search(r'\b(yes|Yes|YES)\.?\b', result['answer']):
+            result['answer'] = "yes"
+
+    elif dataset == "ANLI":
+        result['answer'] = result['answer'].lower()
+
+        match = re.search(r'\((e|c|n|contradiction|neutral|entailment)\)', result['answer'], re.IGNORECASE)
+
+        if match:
+            letter = match.group(1)
+            result['answer'] = letter
+    elif dataset == "Aqua":
         result['answer'] = result['answer'].upper()
-    elif dataset in ["GSM8k", "ECQA"]:
+
+        match = re.search(r'\(([A-E])\)', result['answer'])
+
+        if match:
+            letter = match.group(1)
+            result['answer'] = letter 
+
+    elif dataset == "DateUnderstanding":
+        result['answer'] = result['answer'].upper()
+
+        match = re.search(r'\(([A-E])\)', result['answer'])
+
+        if match:
+            letter = match.group(1)
+            result['answer'] = letter
+    elif dataset == "GSM8k":
         result['answer'] = str(result['answer'])
+    elif dataset == "ECQA":
+        result['answer'] = str(result['answer'])
+        match = re.search(r'\(([A-E])\)', result['answer'])
+
+        if match:
+            letter = match.group(1)
+            result['answer'] = letter
 
     return result
 '''

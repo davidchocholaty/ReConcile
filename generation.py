@@ -140,7 +140,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     if dataset =="SQA":
         result['answer'] = result['answer'].lower()
 
-        matches = re.findall(r'\b(yes|no)\.?\b', result['answer'], re.IGNORECASE)
+        matches = re.findall(r'\b(yes|no)\b', result['answer'], re.IGNORECASE)
         if matches:
             result['answer'] = matches[-1].lower()
 

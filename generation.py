@@ -148,7 +148,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
         result['answer'] = result['answer'].lower()
 
         matches = re.findall(
-            r'\((e|c|n|contradiction|neutral|entailment)\)',
+            r'\b(e|c|n|contradiction|neutral|entailment)\b',
             result['answer'],
             re.IGNORECASE,
         )
@@ -159,7 +159,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     elif dataset == "Aqua":
         result['answer'] = result['answer'].upper()
 
-        matches = re.findall(r'\(([A-E])\)', result['answer'])
+        matches = re.findall(r'\b[A-E]\b', result['answer'])
 
         if matches:
             letter = matches[-1]
@@ -168,7 +168,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     elif dataset == "DateUnderstanding":
         result['answer'] = result['answer'].upper()
 
-        matches = re.findall(r'\(([A-E])\)', result['answer'])
+        matches = re.findall(r'\b[A-E]\b', result['answer'])
 
         if matches:
             letter = matches[-1]
@@ -178,7 +178,7 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
     elif dataset == "ECQA":
         result['answer'] = str(result['answer'])
         
-        matches = re.findall(r'\(([A-E])\)', result['answer'])
+        matches = re.findall(r'\b[A-E]\b', result['answer'])
 
         if matches:
             letter = matches[-1]

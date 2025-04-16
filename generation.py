@@ -121,8 +121,9 @@ def gpt_gen_ans(sample, convincing_samples=None, additional_instruc=None, interv
         contexts[-1]['content'] += " ".join(additional_instruc)
     # print(contexts)
     completion = openai.ChatCompletion.create(
-              engine="gpt-35-turbo",
+              # engine="gpt-35-turbo",
               # engine="gpt-4",
+              engine="gpt-4o",
               messages=contexts)
     
     output = completion['choices'][0]['message']['content']

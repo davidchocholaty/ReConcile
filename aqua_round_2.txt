@@ -1,0 +1,6 @@
+Number of test samples=30
+Initial Round Performance: {'claude_pred': 0.8, 'gpt3_pred': 0.7333333333333333, 'bard_pred': 0.8, 'majority_ans': 0.8, 'weighted_max': 0.7666666666666667}
+----- Round 1 Discussion -----
+Round 1 Performance: {'claude_pred': 0.8, 'gpt3_pred': 0.7666666666666667, 'bard_pred': 0.8, 'majority_ans': 0.8, 'weighted_max': 0.7666666666666667}
+----- Round 2 Discussion -----
+Round 2 Performance: {'claude_pred': 0.8, 'gpt3_pred': 0.7666666666666667, 'bard_pred': 0.8, 'majority_ans': 0.8, 'weighted_max': 0.7666666666666667}

@@ -7,7 +7,8 @@ import random
 import pandas
 import string
 
-random.seed(1234)
+# random.seed(1234)
+random.seed(0)
 
 class StrategyQA:
     def __init__(self, data_dir):
